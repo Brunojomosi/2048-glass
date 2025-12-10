@@ -10,17 +10,17 @@ interface MenuProps {
 
 export const Menu: React.FC<MenuProps> = ({ score, bestScore, onReset, onHome }) => {
   return (
-    <div className="w-[90vw] max-w-md mx-auto pt-6 pb-2">
+    <div className="w-[90vw] max-w-md mx-auto pt-6 pb-2 space-y-2">
+      {/* Top Row: Title and Actions */}
       <div className="flex items-center justify-between bg-glass-100 rounded-2xl p-2 border border-white/10 backdrop-blur-xl shadow-lg w-full">
-
         {/* Left: Title */}
-        <div className="pl-2">
+        <div className="pl-2 flex items-center space-x-2">
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 tracking-tighter drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
             2048
           </h1>
         </div>
 
-        {/* Center: Actions */}
+        {/* Right: Actions */}
         <div className="flex items-center space-x-2">
           <button
             onClick={onHome}
@@ -35,20 +35,20 @@ export const Menu: React.FC<MenuProps> = ({ score, bestScore, onReset, onHome })
             <RefreshCw size={18} />
           </button>
         </div>
+      </div>
 
-        {/* Right: Scores */}
-        <div className="flex space-x-2">
-          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-5 py-2 min-w-[100px]">
-            <span className="text-[9px] uppercase text-cyan-300/80 font-bold tracking-wider mb-0.5">Score</span>
-            <span className="text-base font-mono text-white font-bold leading-none">{score}</span>
+      {/* Bottom Row: Scores */}
+      <div className="flex space-x-2 w-full">
+        <div className="flex-1 flex flex-col items-center justify-center bg-glass-100 border border-white/10 rounded-xl py-2 backdrop-blur-xl">
+          <span className="text-[9px] uppercase text-cyan-300/80 font-bold tracking-wider mb-0.5">Score</span>
+          <span className="text-xl font-mono text-white font-bold leading-none">{score}</span>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center bg-glass-100 border border-white/10 rounded-xl py-2 backdrop-blur-xl">
+          <div className="flex items-center space-x-1 mb-0.5">
+            <Trophy size={10} className="text-yellow-400" />
+            <span className="text-[9px] uppercase text-yellow-400/80 font-bold tracking-wider">Best</span>
           </div>
-          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-5 py-2 min-w-[100px]">
-            <div className="flex items-center space-x-1 mb-0.5">
-              <Trophy size={10} className="text-yellow-400" />
-              <span className="text-[9px] uppercase text-yellow-400/80 font-bold tracking-wider">Best</span>
-            </div>
-            <span className="text-base font-mono text-white font-bold leading-none">{bestScore}</span>
-          </div>
+          <span className="text-xl font-mono text-white font-bold leading-none">{bestScore}</span>
         </div>
       </div>
     </div>

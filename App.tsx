@@ -64,6 +64,11 @@ const App: React.FC = () => {
     const { grid: newGrid, score: moveScore, moved } = moveGrid(grid, direction);
 
     if (moved) {
+      // Light haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+
       let finalGrid = addRandomTile(newGrid);
       setGrid(finalGrid);
       setScore(prev => prev + moveScore);
@@ -156,7 +161,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Main Game Container */}
-          <div className="flex-none relative z-10 animate-pop mb-8">
+          <div className="flex-none relative z-10 animate-pop mb-8 mt-6">
             <div
               className="relative w-[90vw] max-w-md aspect-square bg-glass-100 rounded-2xl p-3 border border-white/10 backdrop-blur-xl shadow-2xl mx-auto"
               onTouchStart={handleTouchStart}
