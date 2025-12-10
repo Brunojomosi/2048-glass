@@ -36,7 +36,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-md h-[80vh] px-4 animate-fade-in relative z-20">
+        <div className="flex flex-col w-full max-w-md h-[80vh] px-4 pt-12 animate-fade-in relative z-20">
             <div className="flex items-center justify-between mb-6">
                 <button
                     onClick={onBack}

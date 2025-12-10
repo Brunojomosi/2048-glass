@@ -10,8 +10,8 @@ interface MenuProps {
 
 export const Menu: React.FC<MenuProps> = ({ score, bestScore, onReset, onHome }) => {
   return (
-    <div className="w-full max-w-md px-4 pt-6 pb-2">
-      <div className="flex items-center justify-between bg-glass-100/50 rounded-2xl p-2 border border-white/5 backdrop-blur-md">
+    <div className="w-[90vw] max-w-md mx-auto pt-6 pb-2">
+      <div className="flex items-center justify-between bg-glass-100 rounded-2xl p-2 border border-white/10 backdrop-blur-xl shadow-lg w-full">
 
         {/* Left: Title */}
         <div className="pl-2">
@@ -38,16 +38,16 @@ export const Menu: React.FC<MenuProps> = ({ score, bestScore, onReset, onHome })
 
         {/* Right: Scores */}
         <div className="flex space-x-2">
-          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-3 py-1.5 min-w-[50px]">
-            <span className="text-[8px] uppercase text-cyan-300/80 font-bold tracking-wider mb-0.5">Score</span>
-            <span className="text-sm font-mono text-white font-bold leading-none">{score}</span>
+          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-5 py-2 min-w-[100px]">
+            <span className="text-[9px] uppercase text-cyan-300/80 font-bold tracking-wider mb-0.5">Score</span>
+            <span className="text-base font-mono text-white font-bold leading-none">{score}</span>
           </div>
-          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-3 py-1.5 min-w-[50px]">
+          <div className="flex flex-col items-center justify-center bg-black/20 border border-white/5 rounded-xl px-5 py-2 min-w-[100px]">
             <div className="flex items-center space-x-1 mb-0.5">
-              <Trophy size={8} className="text-yellow-400" />
-              <span className="text-[8px] uppercase text-yellow-400/80 font-bold tracking-wider">Best</span>
+              <Trophy size={10} className="text-yellow-400" />
+              <span className="text-[9px] uppercase text-yellow-400/80 font-bold tracking-wider">Best</span>
             </div>
-            <span className="text-sm font-mono text-white font-bold leading-none">{bestScore}</span>
+            <span className="text-base font-mono text-white font-bold leading-none">{bestScore}</span>
           </div>
         </div>
       </div>
