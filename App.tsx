@@ -6,6 +6,7 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { Leaderboard } from './components/Leaderboard';
 import { Grid, Direction } from './types';
 import { getEmptyGrid, addRandomTile, moveGrid, checkGameOver } from './utils/gameLogic';
+import { soundManager } from './utils/sounds';
 
 
 const App: React.FC = () => {
@@ -73,8 +74,21 @@ const App: React.FC = () => {
       setGrid(finalGrid);
       setScore(prev => prev + moveScore);
 
+      // Check for 2048 victory
+      const has2048 = finalGrid.some(row => row.some(cell => cell === 2048));
+      if (has2048) {
+        soundManager.playVictory();
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 50, 50, 50, 100]);
+        }
+      }
+
       if (checkGameOver(finalGrid)) {
         setGameOver(true);
+        soundManager.playGameOver();
+        if (navigator.vibrate) {
+          navigator.vibrate([100, 50, 200]);
+        }
       }
     }
   }, [grid, gameOver]);
