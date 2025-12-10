@@ -2,19 +2,21 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Background } from './components/Background';
 import { Menu } from './components/Menu';
 import { Tile } from './components/Tile';
-import { Grid, Direction, AIResponse } from './types';
+import { WelcomeScreen } from './components/WelcomeScreen';
+import { Leaderboard } from './components/Leaderboard';
+import { Grid, Direction } from './types';
 import { getEmptyGrid, addRandomTile, moveGrid, checkGameOver } from './utils/gameLogic';
-import { getNextMoveHint } from './services/geminiService';
+
 
 const App: React.FC = () => {
   const [grid, setGrid] = useState<Grid>(getEmptyGrid());
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  
-  // AI State
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiHint, setAiHint] = useState<AIResponse | null>(null);
+  const [view, setView] = useState<'welcome' | 'game' | 'leaderboard'>('welcome');
+  const [playerName, setPlayerName] = useState('');
+
+
 
   // Load Best Score
   useEffect(() => {
@@ -24,12 +26,26 @@ const App: React.FC = () => {
   }, []);
 
   // Update Best Score
+  // Update Best Score and Save to Leaderboard on Game Over
   useEffect(() => {
     if (score > bestScore) {
       setBestScore(score);
       localStorage.setItem('2048-best-score', score.toString());
     }
   }, [score, bestScore]);
+
+  useEffect(() => {
+    if (gameOver && score > 0) {
+      const history = JSON.parse(localStorage.getItem('2048-leaderboard') || '[]');
+      history.push({
+        name: playerName || 'Anonymous',
+        score: score,
+        date: new Date().toISOString()
+      });
+      history.sort((a: any, b: any) => b.score - a.score);
+      localStorage.setItem('2048-leaderboard', JSON.stringify(history.slice(0, 50)));
+    }
+  }, [gameOver]);
 
   const initGame = () => {
     let newGrid = getEmptyGrid();
@@ -38,13 +54,13 @@ const App: React.FC = () => {
     setGrid(newGrid);
     setScore(0);
     setGameOver(false);
-    setAiHint(null);
+
   };
 
   const handleMove = useCallback((direction: Direction) => {
-    if (gameOver) return;
+    if (gameOver || view !== 'game') return;
 
-    setAiHint(null); // Clear hint on move
+
     const { grid: newGrid, score: moveScore, moved } = moveGrid(grid, direction);
 
     if (moved) {
@@ -105,64 +121,89 @@ const App: React.FC = () => {
     touchStart.current = null;
   };
 
-  const handleAiHint = async () => {
-    if (gameOver || isAiLoading) return;
-    setIsAiLoading(true);
-    const result = await getNextMoveHint(grid, score);
-    setAiHint(result);
-    setIsAiLoading(false);
-  };
+
 
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden font-sans">
+    <div className="relative w-full min-h-[100dvh] flex flex-col items-center font-sans overflow-x-hidden overflow-y-auto">
       <Background />
-      
-      <Menu 
-        score={score} 
-        bestScore={bestScore} 
-        onReset={initGame} 
-        onAiHint={handleAiHint}
-        isAiLoading={isAiLoading}
-        aiHint={aiHint}
-      />
 
-      {/* Main Game Container */}
-      <div 
-        className="relative w-[90vw] max-w-md aspect-square bg-glass-100 rounded-2xl p-3 border border-white/10 backdrop-blur-xl shadow-2xl mt-4"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* The Grid */}
-        <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-2 sm:gap-3">
-          {grid.map((row, rIndex) => (
-            row.map((val, cIndex) => (
-               <div key={`${rIndex}-${cIndex}`} className="relative w-full h-full bg-black/20 rounded-xl">
-                 <div className="absolute inset-0">
-                   <Tile value={val} />
-                 </div>
-               </div> 
-            ))
-          ))}
+      {view === 'welcome' && (
+        <div className="flex-1 flex items-center justify-center w-full min-h-[100dvh]">
+          <WelcomeScreen
+            onStart={(name) => {
+              setPlayerName(name);
+              setView('game');
+              initGame();
+            }}
+            onShowLeaderboard={() => setView('leaderboard')}
+          />
         </div>
+      )}
 
-        {/* Game Over Overlay */}
-        {gameOver && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md rounded-2xl animate-fade-in">
-             <h2 className="text-5xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">Game Over</h2>
-             <p className="text-white/60 mb-8 font-mono">Final Score: {score}</p>
-             <button 
-               onClick={initGame}
-               className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-white font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform"
-             >
-               Try Again
-             </button>
+      {view === 'leaderboard' && (
+        <Leaderboard onBack={() => setView('welcome')} />
+      )}
+
+      {view === 'game' && (
+        <div className="flex flex-col items-center justify-between min-h-[100dvh] py-8 w-full max-w-lg mx-auto">
+          <div className="flex-none z-10 text-center w-full animate-slide mb-4">
+            <Menu
+              score={score}
+              bestScore={bestScore}
+              onReset={initGame}
+              onHome={() => setView('welcome')}
+            />
           </div>
-        )}
-      </div>
 
-      <div className="mt-8 text-center text-white/20 text-xs font-mono">
-        SWIPE TO MOVE &bull; POWERED BY REACT & GEMINI
-      </div>
+          {/* Main Game Container */}
+          <div className="flex-none relative z-10 animate-pop mb-8">
+            <div
+              className="relative w-[90vw] max-w-md aspect-square bg-glass-100 rounded-2xl p-3 border border-white/10 backdrop-blur-xl shadow-2xl mx-auto"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* The Grid */}
+              <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-2 sm:gap-3">
+                {grid.map((row, rIndex) => (
+                  row.map((val, cIndex) => (
+                    <div key={`${rIndex}-${cIndex}`} className="relative w-full h-full bg-black/20 rounded-xl">
+                      <div className="absolute inset-0">
+                        <Tile value={val} />
+                      </div>
+                    </div>
+                  ))
+                ))}
+              </div>
+
+              {/* Game Over Overlay */}
+              {gameOver && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md rounded-2xl animate-fade-in">
+                  <h2 className="text-5xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">Game Over</h2>
+                  <p className="text-white/60 mb-2 font-mono">Final Score: {score}</p>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={initGame}
+                      className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-white font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform"
+                    >
+                      Try Again
+                    </button>
+                    <button
+                      onClick={() => setView('leaderboard')}
+                      className="px-6 py-3 bg-glass-200 rounded-full text-white font-bold hover:bg-glass-300 transition-colors"
+                    >
+                      Leaderboard
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-none text-center text-white/20 text-xs font-mono z-10 animate-fade-in pb-4">
+            SWIPE TO MOVE &bull; POWERED BY MAGENTA DESENVOLVE
+          </div>
+        </div>
+      )}
     </div>
   );
 };

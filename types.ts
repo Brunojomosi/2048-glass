@@ -10,7 +10,4 @@ export interface GameState {
   won: boolean;
 }
 
-export interface AIResponse {
-  move: Direction;
-  reason: string;
-}
+
