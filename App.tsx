@@ -7,6 +7,7 @@ import { Leaderboard } from './components/Leaderboard';
 import { Grid, Direction } from './types';
 import { getEmptyGrid, addRandomTile, moveGrid, checkGameOver } from './utils/gameLogic';
 import { soundManager } from './utils/sounds';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
 
 const App: React.FC = () => {
@@ -65,10 +66,11 @@ const App: React.FC = () => {
     const { grid: newGrid, score: moveScore, moved } = moveGrid(grid, direction);
 
     if (moved) {
-      // Light haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(10);
-      }
+      // Light haptic feedback using Capacitor
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {
+        // Fallback for web
+        if (navigator.vibrate) navigator.vibrate(10);
+      });
 
       let finalGrid = addRandomTile(newGrid);
       setGrid(finalGrid);
@@ -78,17 +80,17 @@ const App: React.FC = () => {
       const has2048 = finalGrid.some(row => row.some(cell => cell === 2048));
       if (has2048) {
         soundManager.playVictory();
-        if (navigator.vibrate) {
-          navigator.vibrate([50, 50, 50, 50, 100]);
-        }
+        Haptics.notification({ type: NotificationType.Success }).catch(() => {
+          if (navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 100]);
+        });
       }
 
       if (checkGameOver(finalGrid)) {
         setGameOver(true);
         soundManager.playGameOver();
-        if (navigator.vibrate) {
-          navigator.vibrate([100, 50, 200]);
-        }
+        Haptics.notification({ type: NotificationType.Error }).catch(() => {
+          if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
+        });
       }
     }
   }, [grid, gameOver]);
